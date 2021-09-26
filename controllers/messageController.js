@@ -103,9 +103,14 @@ const messageController = {
   const currentUser = helpers.getUser(req)
   try{
   //中間資料大戰
-    const data = await Subscribe.findAll({
+    const Influencer = await Subscribe.findAll({
       where: {fansId:currentUser.id},
-      include:[{ model: User, as: 'InfluenceLinks' }]
+      include:[{ 
+        model: User, 
+        as: 'fansLinks',
+        attributes: ['id', 'name', 'avatar']
+       }],
+      raw: true, nest: true
     })
 
   //追蹤者
@@ -119,6 +124,13 @@ const messageController = {
       limit: 10, raw: true, nest: true
     })
 
+    //A.中間欄位
+    const InfluencerData = Influencer.map(d => ({
+      id: d.fansLinks.id,
+      name: d.fansLinks.name,
+      avatar:d.fansLinks.avatar
+    }))
+
     //B. 右側欄位: 取得篩選過的使用者 & 依 followers 數量排列前 10 的使用者推薦名單(排除追蹤者為零者)
     const normalUsers = users.filter(d => d.FollowingLinks.role !== 'admin')
     const topUsers = normalUsers.map(user => ({
@@ -131,7 +143,8 @@ const messageController = {
       isSelf: Boolean(user.FollowingLinks.id === currentUser.id),
     }))
 
-    return res.render('notification', { topUsers, currentUser })
+    console.log(InfluencerData)
+    return res.render('notification', { topUsers, currentUser, InfluencerData})
   }catch{error => {console.log(error)}}
 
  },

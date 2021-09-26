@@ -101,6 +101,16 @@ io.on('connection', (socket) => {
 
   })
 
+  //首頁集線器
+  socket.on('somethingHappened', () => {
+     console.log("有人進來首頁啦===========", socket.id)
+
+     
+  })
+  //有人推文
+  socket.on('somebodySendTweet', (tweet) => {
+    console.log("有人寫了===========", tweet)
+  })
 
 });
 
